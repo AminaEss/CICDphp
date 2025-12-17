@@ -1,0 +1,25 @@
+name: Despliegue en EC2
+run-name: Haciendo un pull desde la ec2
+on: push
+
+jobs:
+  Deploy:
+    name: Desplegar a EC2
+    runs-on: ubuntu-latest
+   
+    steps:
+      - uses: actions/checkout@v2
+      - name: Conectar por ssh y mandar un pull
+        env:
+            PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+            HOSTNAME: ${{secrets.SSH_HOST}}
+            USER_NAME: ${{secrets.USER_NAME}}
+     
+        run: |
+          echo "$PRIVATE_KEY" > private_key && chmod 400 private_key
+         
+          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} '
+         
+              # Estamos dentro de la EC2, listos para traernos cambios
+              cd /var/www/html
+              sudo git pull'
